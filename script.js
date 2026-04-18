@@ -1,5 +1,5 @@
 /* =========================
-   DOM REFERENCES
+   DOM ELEMENTS
 ========================= */
 const categoryFilter = document.getElementById("categoryFilter");
 const productsContainer = document.getElementById("productsContainer");
@@ -18,7 +18,7 @@ let selectedProducts = [];
 let chatHistory = [];
 
 /* =========================
-   INITIAL UI STATE
+   INIT UI
 ========================= */
 productsContainer.innerHTML = `
   <div class="placeholder-message">
@@ -30,21 +30,23 @@ productsContainer.innerHTML = `
    LOAD PRODUCTS
 ========================= */
 async function loadProducts() {
-  const response = await fetch("products.json");
-  const data = await response.json();
+  const res = await fetch("products.json");
+  const data = await res.json();
   allProducts = data.products;
   return allProducts;
 }
 
 /* =========================
-   RENDER PRODUCTS
+   DISPLAY PRODUCTS
 ========================= */
 function displayProducts(products) {
   filteredProducts = products;
 
   productsContainer.innerHTML = products
     .map((product, index) => {
-      const isSelected = selectedProducts.some(p => p.name === product.name);
+      const isSelected = selectedProducts.some(
+        (p) => p.name === product.name
+      );
 
       return `
         <div class="product-card ${isSelected ? "selected" : ""}"
@@ -55,7 +57,7 @@ function displayProducts(products) {
           <div class="product-info">
             <h3>${product.name}</h3>
             <p>${product.brand}</p>
-            <p class="desc">${product.description || ""}</p>
+            <p>${product.description || ""}</p>
           </div>
         </div>
       `;
@@ -64,15 +66,20 @@ function displayProducts(products) {
 }
 
 /* =========================
-   SELECT / UNSELECT PRODUCT
+   TOGGLE PRODUCT
 ========================= */
 function toggleProduct(index) {
   const product = filteredProducts[index];
+  if (!product) return;
 
-  const exists = selectedProducts.find(p => p.name === product.name);
+  const exists = selectedProducts.some(
+    (p) => p.name === product.name
+  );
 
   if (exists) {
-    selectedProducts = selectedProducts.filter(p => p.name !== product.name);
+    selectedProducts = selectedProducts.filter(
+      (p) => p.name !== product.name
+    );
   } else {
     selectedProducts.push(product);
   }
@@ -88,22 +95,23 @@ function toggleProduct(index) {
 function updateSelectedUI() {
   selectedProductsList.innerHTML = "";
 
-  selectedProducts.forEach(product => {
-    const item = document.createElement("div");
-    item.className = "selected-item";
+  selectedProducts.forEach((product) => {
+    const div = document.createElement("div");
+    div.className = "selected-item";
 
-    item.innerHTML = `
+    div.innerHTML = `
       <span>${product.name}</span>
       <button onclick="removeProduct('${product.name}')">Remove</button>
     `;
 
-    selectedProductsList.appendChild(item);
+    selectedProductsList.appendChild(div);
   });
 }
 
-/* Remove product */
 function removeProduct(name) {
-  selectedProducts = selectedProducts.filter(p => p.name !== name);
+  selectedProducts = selectedProducts.filter(
+    (p) => p.name !== name
+  );
 
   saveSelections();
   updateSelectedUI();
@@ -114,16 +122,15 @@ function removeProduct(name) {
    LOCAL STORAGE
 ========================= */
 function saveSelections() {
-  localStorage.setItem("selectedProducts", JSON.stringify(selectedProducts));
+  localStorage.setItem(
+    "selectedProducts",
+    JSON.stringify(selectedProducts)
+  );
 }
 
 function loadSelections() {
   const saved = localStorage.getItem("selectedProducts");
-
-  if (saved) {
-    selectedProducts = JSON.parse(saved);
-    updateSelectedUI();
-  }
+  if (saved) selectedProducts = JSON.parse(saved);
 }
 
 /* =========================
@@ -131,77 +138,107 @@ function loadSelections() {
 ========================= */
 categoryFilter.addEventListener("change", async (e) => {
   const products = await loadProducts();
-  const selectedCategory = e.target.value;
 
   const filtered = products.filter(
-    product => product.category === selectedCategory
+    (p) => p.category === e.target.value
   );
 
   displayProducts(filtered);
 });
 
 /* =========================
-   CLOUDFARE WORKER CALL
+   CALL WORKER
 ========================= */
-async function callWorker(products, message = "") {
-  const response = await fetch("YOUR_WORKER_URL_HERE", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      products,
-      message,
-      history: chatHistory
-    })
-  });
+async function callWorker(products, message) {
+  const res = await fetch(
+    "https://round-darkness-55c6.teklins7.workers.dev/",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        products,
+        message,
+        history: chatHistory
+      })
+    }
+  );
 
-  return await response.json();
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    return { response: "Error: Invalid server response." };
+  }
+
+  return data;
 }
 
 /* =========================
-   GENERATE ROUTINE (AI)
+   GENERATE ROUTINE
 ========================= */
 generateRoutineBtn.addEventListener("click", async () => {
   if (selectedProducts.length === 0) {
-    chatWindow.innerHTML += `<p><strong>Select products first.</strong></p>`;
+    chatWindow.innerHTML += `<p><strong>Please select products first.</strong></p>`;
     return;
   }
 
   chatWindow.innerHTML += `<p><em>Generating your personalized routine...</em></p>`;
 
-  const data = await callWorker(selectedProducts, "Generate routine");
+  try {
+    const data = await callWorker(
+      selectedProducts,
+      "Generate skincare routine"
+    );
 
-  chatWindow.innerHTML += `
-    <p><strong>AI Routine:</strong><br>${data.response}</p>
-  `;
+    chatWindow.innerHTML += `
+      <p><strong>Routine:</strong><br>
+      ${data.response || data.error || "No response received."}</p>
+    `;
+  } catch {
+    chatWindow.innerHTML += `
+      <p><strong>Error:</strong> Could not generate routine.</p>
+    `;
+  }
 });
 
 /* =========================
-   CHAT (FOLLOW-UP MEMORY)
+   CHAT SYSTEM
 ========================= */
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const message = userInput.value;
+  userInput.value = "";
 
   chatHistory.push({ role: "user", content: message });
 
   chatWindow.innerHTML += `<p><strong>You:</strong> ${message}</p>`;
 
-  const data = await callWorker(selectedProducts, message);
+  try {
+    const data = await callWorker(selectedProducts, message);
 
-  chatHistory.push({ role: "assistant", content: data.response });
+    chatHistory.push({
+      role: "assistant",
+      content: data.response
+    });
 
-  chatWindow.innerHTML += `
-    <p><strong>Advisor:</strong> ${data.response}</p>
-  `;
-
-  userInput.value = "";
+    chatWindow.innerHTML += `
+      <p><strong>Advisor:</strong>
+      ${data.response || data.error || "No response."}</p>
+    `;
+  } catch {
+    chatWindow.innerHTML += `
+      <p><strong>Error:</strong> Chat failed.</p>
+    `;
+  }
 });
 
 /* =========================
    INIT
 ========================= */
 (async function init() {
-  await loadProducts();
+  const products = await loadProducts();
   loadSelections();
+  updateSelectedUI();
+  displayProducts(products);
 })();
