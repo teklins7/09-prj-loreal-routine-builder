@@ -202,7 +202,7 @@ generateRoutineBtn.addEventListener("click", async () => {
 });
 
 /* =========================
-   CHAT SYSTEMs
+   CHAT SYSTEMS for final
 ========================= */
 chatForm.addEventListener("submit", async (e) => {
   e.preventDefault();
