@@ -5,12 +5,22 @@
   padding: 0;
 }
 
+/* —— L'Oréal brand colors —— */
+:root {
+  --primary: #ff003b;
+  --accent: #e3a535;
+  --dark: #111;
+  --gray: #666;
+  --light: #fafafa;
+}
+
 /* —— body + fonts —— */
 body {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
   color: #333;
   display: flex;
   justify-content: center;
+  background: #f7f7f7;
 }
 
 .page-wrapper {
@@ -32,8 +42,7 @@ body {
 
 .site-title {
   font-size: 22px;
-  font-weight: 500;
-  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 /* category filter */
@@ -46,7 +55,7 @@ body {
   width: 100%;
   padding: 16px;
   font-size: 18px;
-  border: 2px solid #000;
+  border: 2px solid var(--dark);
   border-radius: 8px;
   cursor: pointer;
   background-color: white;
@@ -55,15 +64,16 @@ body {
 
 .search-section select:focus {
   outline: none;
-  border-color: #666;
+  border-color: var(--primary);
 }
 
 /* chat section */
 .chatbox {
   margin: 40px 0;
-  border: 2px solid #000;
+  border: 2px solid var(--dark);
   border-radius: 8px;
   padding: 26px;
+  background: white;
 }
 
 .chatbox h2 {
@@ -73,12 +83,13 @@ body {
 
 .chat-window {
   padding: 20px;
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
   height: 250px;
   overflow-y: auto;
-  background: #fafafa;
+  background: var(--light);
   margin-bottom: 20px;
+  border-radius: 6px;
 }
 
 /* placeholder message */
@@ -86,7 +97,7 @@ body {
   width: 100%;
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--gray);
   font-size: 18px;
 }
 
@@ -100,7 +111,7 @@ body {
 .chat-form input {
   flex: 1;
   padding: 12px;
-  font-size: 18px;
+  font-size: 16px;
   border: none;
   border-bottom: 2px solid #ccc;
   background: transparent;
@@ -108,12 +119,12 @@ body {
 
 .chat-form input:focus {
   outline: none;
-  border-bottom-color: #000;
+  border-bottom-color: var(--primary);
 }
 
 .chat-form button {
   font-size: 18px;
-  background: #000;
+  background: var(--dark);
   color: #fff;
   border: none;
   padding: 12px;
@@ -123,16 +134,11 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: 0.3s;
 }
 
 .chat-form button:hover {
-  background: #666666;
-}
-
-.chat-form button:focus {
-  outline: 2px solid #000;
-  outline-offset: 2px;
+  background: var(--primary);
 }
 
 /* visually hidden */
@@ -153,7 +159,7 @@ body {
   margin: 60px 0 40px;
   text-align: center;
   font-size: 14px;
-  color: #666;
+  color: var(--gray);
 }
 
 .site-footer nav {
@@ -162,12 +168,12 @@ body {
 
 .site-footer a {
   margin: 0 8px;
-  color: #000;
+  color: var(--dark);
   text-decoration: none;
 }
 
 .site-footer a:hover {
-  color: #666666;
+  color: var(--primary);
 }
 
 /* products grid */
@@ -180,12 +186,26 @@ body {
 
 .product-card {
   flex: 0 1 calc(33.333% - 14px);
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   padding: 15px;
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   gap: 15px;
   min-height: 160px;
+  background: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+}
+
+/* selected product highlight (IMPORTANT) */
+.product-card.selected {
+  border: 2px solid var(--primary);
+  box-shadow: 0 0 10px rgba(255, 0, 59, 0.2);
 }
 
 .product-card img {
@@ -200,7 +220,6 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 110px;
 }
 
 .product-card h3 {
@@ -210,15 +229,16 @@ body {
 
 .product-card p {
   font-size: 14px;
-  color: #666;
+  color: var(--gray);
 }
 
 /* selected products */
 .selected-products {
   margin: 40px 0;
   padding: 20px;
-  border: 2px solid #000;
+  border: 2px solid var(--dark);
   border-radius: 8px;
+  background: white;
 }
 
 .selected-products h2 {
@@ -232,6 +252,7 @@ body {
   gap: 10px;
 }
 
+/* button */
 .generate-btn {
   width: 100%;
   margin-top: 20px;
@@ -239,17 +260,20 @@ body {
   font-size: 18px;
   font-weight: 500;
   color: #fff;
-  background: #000;
+  background: var(--dark);
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: 0.3s;
 }
 
 .generate-btn:hover {
-  background: #666;
+  background: var(--primary);
 }
 
-.generate-btn i {
-  margin-right: 8px;
+/* responsive */
+@media (max-width: 768px) {
+  .product-card {
+    flex: 0 1 100%;
+  }
 }
